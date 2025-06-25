@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -9,12 +7,34 @@ const CompoundInterestCalculator = () => {
   const [annualContribution, setAnnualContribution] = useState(5000);
   const [years, setYears] = useState(20);
 
+  // 处理输入值，允许空字符串
+  const handleNumberInput = (value, setter, defaultValue = 0) => {
+    if (value === '') {
+      setter('');
+    } else {
+      const numValue = Number(value);
+      if (!isNaN(numValue)) {
+        setter(numValue);
+      }
+    }
+  };
+
+  // 获取有效的数值，空字符串时使用默认值
+  const getValidNumber = (value, defaultValue = 0) => {
+    return value === '' ? defaultValue : Number(value);
+  };
+
   const data = useMemo(() => {
     const result = [];
-    let totalAmount = initialAmount;
-    let totalContributions = initialAmount;
+    const validInitialAmount = getValidNumber(initialAmount, 10000);
+    const validAnnualReturn = getValidNumber(annualReturn, 8);
+    const validAnnualContribution = getValidNumber(annualContribution, 5000);
+    const validYears = getValidNumber(years, 20);
     
-    for (let year = 0; year <= years; year++) {
+    let totalAmount = validInitialAmount;
+    let totalContributions = validInitialAmount;
+    
+    for (let year = 0; year <= validYears; year++) {
       if (year === 0) {
         result.push({
           year: year,
@@ -24,10 +44,10 @@ const CompoundInterestCalculator = () => {
         });
       } else {
         // 先计算收益
-        totalAmount = totalAmount * (1 + annualReturn / 100);
+        totalAmount = totalAmount * (1 + validAnnualReturn / 100);
         // 年底追加投资
-        totalAmount += annualContribution;
-        totalContributions += annualContribution;
+        totalAmount += validAnnualContribution;
+        totalContributions += validAnnualContribution;
         
         result.push({
           year: year,
@@ -76,10 +96,11 @@ const CompoundInterestCalculator = () => {
               <input
                 type="number"
                 value={initialAmount}
-                onChange={(e) => setInitialAmount(Number(e.target.value))}
+                onChange={(e) => handleNumberInput(e.target.value, setInitialAmount, 10000)}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
                 min="1000"
                 step="1000"
+                placeholder="请输入启动资金"
               />
             </div>
             
@@ -88,11 +109,12 @@ const CompoundInterestCalculator = () => {
               <input
                 type="number"
                 value={annualReturn}
-                onChange={(e) => setAnnualReturn(Number(e.target.value))}
+                onChange={(e) => handleNumberInput(e.target.value, setAnnualReturn, 8)}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
                 min="0"
                 max="50"
                 step="0.5"
+                placeholder="请输入年化收益率"
               />
             </div>
             
@@ -101,10 +123,11 @@ const CompoundInterestCalculator = () => {
               <input
                 type="number"
                 value={annualContribution}
-                onChange={(e) => setAnnualContribution(Number(e.target.value))}
+                onChange={(e) => handleNumberInput(e.target.value, setAnnualContribution, 5000)}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
                 min="0"
                 step="1000"
+                placeholder="请输入年度追加投资"
               />
             </div>
             
@@ -113,10 +136,11 @@ const CompoundInterestCalculator = () => {
               <input
                 type="number"
                 value={years}
-                onChange={(e) => setYears(Number(e.target.value))}
+                onChange={(e) => handleNumberInput(e.target.value, setYears, 20)}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
                 min="1"
                 max="50"
+                placeholder="请输入投资年限"
               />
             </div>
           </div>
